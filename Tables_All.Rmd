@@ -1,0 +1,125 @@
+---
+title: "All_Demos_Tables"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r echo=FALSE, results='asis'}
+library(arsenal)
+# Set working directory to wherever the healthy data live.
+# Source should reference summary_se_function.R so set that path to wherever it lives.
+setwd("/Users/hayurob/Documents/_Roalf_Lab/7T_GluCEST_Age/PrevData/IIV_in_IOA/ADCOG")
+demos<-read.csv("updated_demos.csv")
+
+# Demographics - create a new column based on Group, but rename HYA and HOA.
+setwd("/Users/hayurob/Documents/_Roalf_Lab/7T_GluCEST_Age/PrevData/IIV_in_IOA/ADCOG/healthy")
+# Demographics
+demos_2<-read.csv("Age.csv")
+CCI<-read.csv("healthy_CCI.csv")
+demos_2<-merge(demos_2, CCI, by="Subject", all=T)
+colnames(demos_2)<-c("Subject","age","group","Race","Gender","CCI")
+
+demos<-merge(demos,demos_2,all = TRUE)
+demos$cohort<-demos$group
+demos$cohort[demos$group==1]<-'HYA'
+demos$cohort[demos$Group_2=='HOA']<- 'HOA'
+demos<-subset(demos, cohort=='HYA' | cohort=='HOA', select = c(Subject,CCI,age,Race,Gender,cohort))
+
+
+# Make table by cohort
+# To remove Total column:
+# my_controls<-tableby.control(total=FALSE) and put control=my_controls in tableby
+# Chi-sq p value not matching manual p value
+my_controls<-tableby.control(total=FALSE, numeric.stats = c("meansd","range"),digits = 2L,digits.p = 2L)
+healthy_table<-tableby(cohort~age+Gender+Race+CCI,data=demos,control=my_controls)
+my_labels<-list(
+  age='Age',
+  Gender='Gender',
+  Race='Race',
+  CCI='CCI Score'
+)
+
+summary(healthy_table,labelTranslations=my_labels,title='Demographics')
+
+# ADCOG data
+library(arsenal)
+setwd("/Users/hayurob/Documents/_Roalf_Lab/7T_GluCEST_Age/PrevData/IIV_in_IOA/ADCOG/")
+
+# Demographics for HOA v AOA
+demos<-read.csv("updated_demos.csv")
+
+# demos$CERADTotal<-as.numeric(as.character(demos$CERADTotal))
+
+my_controls<-tableby.control(total=FALSE, numeric.stats = c("meansd","range"),digits = 2L,digits.p = 2L)
+old_table<-tableby(Group_2~age+Gender+Race+Education,data=demos,control=my_controls)
+my_labels<-list(
+  age='Age'
+)
+
+summary(old_table,labelTranslations=my_labels,title='Demographics')
+
+cat("\\newpage")
+
+# Cognitive Scales - HOA v MCI
+my_controls<-tableby.control(total=FALSE, numeric.stats = c("N","meansd","range"),digits = 2L,digits.p = 2L)
+old_table_scores_2<-tableby(Group_2~CCI+MMSE.Score+MoCA.Total+GDSTotal+CERADTotal,data=demos,control=my_controls)
+my_labels<-list(
+  MMSE.Score='MMSE',
+  MoCA.Total='MoCA',
+  GDSTotal='GDS',
+  CERADTotal='CERAD'
+)
+
+summary(old_table_scores_2,labelTranslations=my_labels,title='Scales')
+
+# Cognitive Scales - HOA v AOA
+# my_controls<-tableby.control(total=FALSE, numeric.stats = c("N","meansd","range"),digits = 2L,digits.p = 2L)
+# old_table_scores<-tableby(Group_2~CCI+MMSE.Score+MoCA.Total+GDSTotal+CERADTotal,data=demos,control=my_controls)
+# my_labels<-list(
+#   MMSE.Score='MMSE',
+#   MoCA.Total='MoCA',
+#   GDSTotal='GDS',
+#   CERADTotal='CERAD'
+# )
+
+# summary(old_table_scores,labelTranslations=my_labels,title='Scales')
+
+# Demographics - HOA v MCI v SCM
+# my_controls<-tableby.control(total=FALSE, numeric.stats = c("meansd"),digits = 2L,digits.p = 2L)
+# old_table_2<-tableby(DX_new~age+Gender+Race+Education,data=demos,control=my_controls)
+# my_labels<-list(
+#   age='Age'
+# )
+
+# summary(old_table_2,labelTranslations=my_labels,title='Demographics (HOA v MCI v SMC)')
+
+demos$DX_graph[demos$DX_graph=='SCM']<-'SMC'
+
+# Demographics - HOA v MCI v SCM
+my_controls<-tableby.control(total=FALSE, numeric.stats = c("meansd","range"),digits = 2L,digits.p = 2L)
+old_table<-tableby(DX_graph~age+Gender+Race+Education,data=demos,control=my_controls)
+my_labels<-list(
+  age='Age'
+)
+
+summary(old_table,labelTranslations=my_labels,title='Demographics (HOA v MCI v SMC)')
+
+cat("\\newpage")
+
+# Cognitive Scales - HOA v MCI v SCM
+my_controls<-tableby.control(total=FALSE, numeric.stats = c("N","meansd","range"),digits = 2L,digits.p = 2L)
+old_table_scores_2<-tableby(DX_graph~CCI+MMSE.Score+MoCA.Total+GDSTotal+CERADTotal,data=demos,control=my_controls)
+my_labels<-list(
+  MMSE.Score='MMSE',
+  MoCA.Total='MoCA',
+  GDSTotal='GDS',
+  CERADTotal='CERAD'
+)
+
+summary(old_table_scores_2,labelTranslations=my_labels,title='Scales (HOA v MCI v SMC)')
+```
+
