@@ -10,3 +10,5 @@ This repository contains the following documents:
   In an effort to organize and clean code, these functions were created in order to do the same data analysis/cleaning on many similar datasets.
 3. Tables_All.Rmd
   This R Markdown file creates tables from the data.
+4. EF_variability_scoring.sh
+  This bash script scores intra-individual variability using raw reaction time data. This script organizes the data, calls R scripts to score the data, and puts the output into csv files.
